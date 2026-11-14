@@ -1,0 +1,9 @@
+_crm_old
+.venv
+venv
+.git
+**/__pycache__
+.env*
+data
+ml
+tests

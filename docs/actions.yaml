@@ -1,0 +1,51 @@
+# Action library (PLAN.md §11.2). Owned by D2: people write these, the model only
+# rephrases. Pattern × severity (1 Watch, 2 Alert, 3 Critical) → up to 3 keys.
+# A missing severity falls back to the next lower one; a missing pattern to `default`.
+
+actions:
+  recheck_fit: "Check the sensor fit and repeat the reading."
+  spot_oximeter: "Take a spot reading with the kit pulse oximeter."
+  rest_5min: "Sit or lie still for 5 minutes, then look again."
+  hydrate: "Drink water and note it in today's check-in."
+  notify_cmo: "Tell the crew medical officer now."
+  notify_cmo_later: "Mention it to the crew medical officer at the next check."
+  move_module: "Move to a module with fresh air supply."
+  check_eclss: "Ask the crew to check the CO2 scrubber and air flow."
+  pressure_protocol: "Follow the cabin pressure leak checklist."
+  thermometer: "Measure body temperature with the kit thermometer."
+  report_ground: "Add this to the report for the ground team."
+  ignore_artifact: "Likely a sensor problem; re-seat the band if it continues."
+
+patterns:
+  default:
+    1: [recheck_fit, report_ground]
+    2: [recheck_fit, notify_cmo_later, report_ground]
+    3: [recheck_fit, notify_cmo]
+  hypoxia:
+    1: [recheck_fit, spot_oximeter]
+    2: [recheck_fit, spot_oximeter, notify_cmo_later]
+    3: [spot_oximeter, move_module, notify_cmo]
+  tachycardia_rest:
+    1: [rest_5min, hydrate]
+    2: [rest_5min, recheck_fit, notify_cmo_later]
+    3: [rest_5min, notify_cmo]
+  bradycardia:
+    1: [recheck_fit, report_ground]
+    2: [recheck_fit, notify_cmo_later]
+    3: [recheck_fit, notify_cmo]
+  fever_like:
+    1: [thermometer, hydrate]
+    2: [thermometer, hydrate, notify_cmo_later]
+    3: [thermometer, notify_cmo]
+  hypercapnia:
+    1: [check_eclss, report_ground]
+    2: [check_eclss, move_module]
+    3: [move_module, check_eclss, notify_cmo]
+  depressurization:
+    1: [pressure_protocol, report_ground]
+    2: [pressure_protocol, notify_cmo]
+    3: [pressure_protocol, notify_cmo]
+  sensor_artifact:
+    1: [ignore_artifact]
+    2: [ignore_artifact, recheck_fit]
+    3: [recheck_fit, spot_oximeter]

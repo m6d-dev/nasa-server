@@ -1,0 +1,60 @@
+# BACKEND_TZ §14: postgres, backend, vdev, ollama (optional).
+# Settings come from .env (copy .env.example), like the CRM's compose files.
+# vdev and ollama images are owned by EMB and ML; set their build/image when ready.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-vigil}
+      POSTGRES_USER: ${POSTGRES_USER:-vigil}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vigil}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_EXTERNAL_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 2s
+      retries: 30
+
+  backend:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # container network names override the host-oriented values in .env
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      HOST: 0.0.0.0
+      PORT: 8000  # inside the container; ${PORT} is the published host port
+      VDEV_URL: ${VDEV_URL_IN_COMPOSE:-http://vdev:8100}
+    volumes:
+      - ./ml/models:/code/ml/models:ro
+      - ./data/radlab:/code/data/radlab:ro
+      - ./docs/actions.yaml:/code/docs/actions.yaml:ro
+    ports:
+      - "${PORT:-8000}:8000"
+
+  vdev:
+    profiles: ["vdev"]
+    image: ${VDEV_IMAGE:-vigil-vdev}
+    environment:
+      INGEST_URL: ws://backend:8000/ingest
+    ports:
+      - "8100:8100"
+
+  ollama:
+    profiles: ["llm"]
+    image: ollama/ollama:latest  # TODO: pin the tag the ML team tested with
+    volumes:
+      - ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+
+volumes:
+  pgdata:
+  ollama:

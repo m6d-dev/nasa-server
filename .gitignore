@@ -1,0 +1,23 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.idea/
+.vscode/
+
+# datasets and model files are not committed (PLAN.md §4)
+data/*
+!data/radlab/
+data/radlab/*
+!data/radlab/.gitkeep
+ml/models/*
+!ml/models/.gitkeep
+
+# the copied CRM tree, kept only until it is deleted by hand
+_crm_old/

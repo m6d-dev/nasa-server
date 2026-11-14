@@ -1,0 +1,11 @@
+litestar>=2.19,<3
+uvicorn[standard]>=0.42,<0.43
+pydantic>=2.14,<3
+pydantic-settings>=2.12,<3
+dependency-injector>=4.48,<5
+sqlalchemy==2.0.54
+asyncpg>=0.31,<0.32
+greenlet>=3.3,<4
+httpx>=0.28,<0.29
+numpy>=2.2,<3
+pyyaml>=6,<7
